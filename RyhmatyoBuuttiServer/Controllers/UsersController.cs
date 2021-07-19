@@ -22,7 +22,7 @@ namespace RyhmatyoBuuttiServer.Controllers
         }
 
         [HttpGet("users")]
-        public List<User> getAllUsers()
+        public IEnumerable<User> getAllUsers()
         {
             return UserRepository.getAllUsers();
         }
