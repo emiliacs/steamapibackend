@@ -1,5 +1,6 @@
 ﻿using RyhmatyoBuuttiServer.Models;
 using System;
+using System.Collections.Generic;
 
 namespace RyhmatyoBuuttiServer.Repositories
 {
@@ -8,5 +9,6 @@ namespace RyhmatyoBuuttiServer.Repositories
         void AddUser(User newUser);
         Boolean doesEmailExist(User user);
         Boolean doesUsernameExist(User user);
+        public List<User> getAllUsers();
     }
 }

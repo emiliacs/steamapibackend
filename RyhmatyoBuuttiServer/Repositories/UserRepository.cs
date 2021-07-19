@@ -30,5 +30,10 @@ namespace RyhmatyoBuuttiServer.Repositories
         {
             return _context.Users.Any(u => u.Username == user.Username);
         }
+
+        public List<User> getAllUsers()
+        {
+            return _context.Users.ToList();
+        }
     }
 }
