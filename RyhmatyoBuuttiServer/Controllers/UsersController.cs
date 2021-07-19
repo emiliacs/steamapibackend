@@ -21,10 +21,10 @@ namespace RyhmatyoBuuttiServer.Controllers
             UserRepository = iUserRepository;
         }
 
-        [HttpGet("test")]
-        public string helloWorld()
+        [HttpGet("users")]
+        public IEnumerable<User> getAllUsers()
         {
-            return "Hello World!";
+            return UserRepository.getAllUsers();
         }
 
         [HttpPost("createUser")]
