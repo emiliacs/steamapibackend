@@ -9,6 +9,6 @@ namespace RyhmatyoBuuttiServer.Repositories
         void AddUser(User newUser);
         Boolean doesEmailExist(User user);
         Boolean doesUsernameExist(User user);
-        public List<User> getAllUsers();
+        public IEnumerable<User> getAllUsers();
     }
 }
