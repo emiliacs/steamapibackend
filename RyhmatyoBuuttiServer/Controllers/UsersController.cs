@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using BC = BCrypt.Net.BCrypt;
 using Microsoft.AspNetCore.Mvc;
 using RyhmatyoBuuttiServer.Models;
 using RyhmatyoBuuttiServer.Repositories;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace RyhmatyoBuuttiServer.Controllers
 {
@@ -16,9 +13,11 @@ namespace RyhmatyoBuuttiServer.Controllers
     public class UsersController : ControllerBase
     {
         private IUserRepository UserRepository;
-        public UsersController(IUserRepository iUserRepository)
+        private IMapper Mapper;
+        public UsersController(IUserRepository iUserRepository, IMapper iMapper)
         {
             UserRepository = iUserRepository;
+            Mapper = iMapper;
         }
 
         [HttpGet("users")]
@@ -27,29 +26,38 @@ namespace RyhmatyoBuuttiServer.Controllers
             return UserRepository.getAllUsers();
         }
 
-        [HttpPost("createUser")]
-        public void createUser(UserRegistrationDto registrationDto)
+        [HttpPost("register")]
+        public IActionResult Register(UserRegistrationDTO model, string origin)
         {
-            if (UserRepository.doesEmailExist(registrationDto.toUser()))
-                {
-                    ModelState.AddModelError("EmailExists", "Email address already exists");
-                }
+            // List for collecting duplication errors
+            List<string> duplicates = new List<string>();
 
-                if (UserRepository.doesUsernameExist(registrationDto.toUser()))
-                {
-                    ModelState.AddModelError("UsernameExists", "Username already exists");
-                }
+            // Validation if there are duplicates
+            if (UserRepository.doesEmailExist(model.Email))
+            {
+                duplicates.Add("This email address already exists");
+            }
 
-                if (ModelState.IsValid)
+            if (UserRepository.doesUsernameExist(model.Username))
             {
-                registrationDto.Password = PasswordHasher.Hash(registrationDto.Password);
-                UserRepository.AddUser(registrationDto.toUser());
+                duplicates.Add("This username already exists");
             }
-                else
+
+            if (duplicates.Any())
             {
-                return;
+                return BadRequest(duplicates);
             }
-       
+
+            // Map model to new user object using Automapper
+            var user = Mapper.Map<User>(model);
+
+            // Hash password
+            user.Password = BC.HashPassword(model.Password);
+
+            // Save account to database
+            UserRepository.AddUser(user);
+            return Ok(new { message = "Registration successful." });
+
         }
     }
 }

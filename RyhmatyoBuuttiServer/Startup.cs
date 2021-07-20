@@ -30,6 +30,7 @@ namespace RyhmatyoBuuttiServer
             services.AddDbContext<UsersContext>(options => options.UseNpgsql(@"Server=PostgreSQL 13;Host=localhost;Port=5432;Username=postgres;Password=superuser;Database=db_ryhmatyo_buutti"));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddControllers().AddNewtonsoftJson();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "RyhmatyoBuuttiServer", Version = "v1" });

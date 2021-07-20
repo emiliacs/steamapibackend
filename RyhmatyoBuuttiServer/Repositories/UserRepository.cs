@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace RyhmatyoBuuttiServer.Repositories
 {
@@ -21,14 +20,14 @@ namespace RyhmatyoBuuttiServer.Repositories
             _context.SaveChanges();
         }
 
-        public Boolean doesEmailExist(User user)
+        public Boolean doesEmailExist(string email)
         {
-           return _context.Users.Any(u => u.Email == user.Email);
+           return _context.Users.Any(u => u.Email == email);
         }
 
-        public Boolean doesUsernameExist(User user)
+        public Boolean doesUsernameExist(string username)
         {
-            return _context.Users.Any(u => u.Username == user.Username);
+            return _context.Users.Any(u => u.Username == username);
         }
 
         public IEnumerable<User> getAllUsers()

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace RyhmatyoBuuttiServer.Models
 {
-    public class UserRegistrationDto
+    public class UserRegistrationDTO
     {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email address.")]
@@ -17,21 +13,10 @@ namespace RyhmatyoBuuttiServer.Models
         public string Username { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]
-        [DataType(DataType.Password)]
         [StringLength(255, ErrorMessage = "{0} length must be between {2} and {1}.", MinimumLength = 8)]
         public string Password { get; set; }
 
         [Compare("Password", ErrorMessage = "Passwords not matching.")]
-        [DataType(DataType.Password)]
         public string ConfirmPassword { get; set; }
-
-        public User toUser()
-        {
-            User user = new User();
-            user.Email = this.Email;
-            user.Username = this.Username;
-            user.Password = this.Password;
-            return user;
-        }
     }
 }
