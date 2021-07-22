@@ -12,6 +12,7 @@ namespace RyhmatyoBuuttiServer
         public AutoMapperProfile()
         {
             CreateMap<UserRegistrationDTO, User>();
+            CreateMap<User, UserAuthenticateResponse>();
         }
     }
 }
