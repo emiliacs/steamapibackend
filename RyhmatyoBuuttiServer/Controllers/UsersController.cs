@@ -30,8 +30,6 @@ namespace RyhmatyoBuuttiServer.Controllers
         [HttpGet("users")]
         public IEnumerable<User> getAllUsers()
         {
-            //ClaimsPrincipal cp = HttpContext.User;
-            //System.Diagnostics.Debug.WriteLine(cp.Identity.Name);
             return UserRepository.getAllUsers();
         }
 
@@ -75,8 +73,6 @@ namespace RyhmatyoBuuttiServer.Controllers
             var jwtToken = JWTAuthenticationManager.generateJWT(user);
             var response = Mapper.Map<UserAuthenticateResponse>(user);
             response.JwtToken = jwtToken;
-            //System.Diagnostics.Debug.WriteLine("JUST FOR TESTING PURPOSES");
-            //System.Diagnostics.Debug.WriteLine("YOUR ACCESS TOKEN IS: "+ response.JwtToken);
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
