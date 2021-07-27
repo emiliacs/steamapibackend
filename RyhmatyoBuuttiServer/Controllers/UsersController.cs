@@ -5,11 +5,10 @@ using RyhmatyoBuuttiServer.Models;
 using RyhmatyoBuuttiServer.Repositories;
 using System.Collections.Generic;
 using System.Linq;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using System.Net.Http.Headers;
+using System.Net.Http;
 using System.Security.Claims;
-using System;
 
 namespace RyhmatyoBuuttiServer.Controllers
 {
@@ -19,12 +18,15 @@ namespace RyhmatyoBuuttiServer.Controllers
     {
         private IUserRepository UserRepository;
         private IMapper Mapper;
-        public UsersController(IUserRepository iUserRepository, IMapper iMapper)
+        private IJWTAuthenticationManager JWTAuthenticationManager;
+        public UsersController(IUserRepository iUserRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager)
         {
             UserRepository = iUserRepository;
             Mapper = iMapper;
+            JWTAuthenticationManager = iJWTAuthenticationManager;
         }
 
+        [Authorize]
         [HttpGet("users")]
         public IEnumerable<User> getAllUsers()
         {
@@ -68,25 +70,13 @@ namespace RyhmatyoBuuttiServer.Controllers
                 return BadRequest(new { message = "Invalid username or password." });
             }
 
-            //var jwtToken = generateJwtToken(user);
-            //var response = Mapper.Map<UserAuthenticateResponse>(user);
-            //response.JwtToken = jwtToken;
+            var jwtToken = JWTAuthenticationManager.generateJWT(user);
+            var response = Mapper.Map<UserAuthenticateResponse>(user);
+            response.JwtToken = jwtToken;
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
             return Ok(new { message = "Successfully logged in." });
         }
-
-        //private string generateJwtToken(User user)
-        //{
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var key = Encoding.ASCII.GetBytes("57053634-6a5a-45fa-a607-3444801f1ea4");
-        //    var tokenDescriptor = new SecurityTokenDescriptor
-        //    {
-        //        Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
-        //        Expires = DateTime.UtcNow.AddMinutes(15),
-        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        //    };
-        //    var token = tokenHandler.CreateToken(tokenDescriptor);
-        //    return tokenHandler.WriteToken(token);
-        //}
     }
 }
