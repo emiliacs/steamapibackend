@@ -15,6 +15,7 @@ namespace RyhmatyoBuuttiServer
     {
 
         private readonly string tokenKey;
+        private readonly DateTime tokenExpirationTime = DateTime.Now.AddMinutes(15);
 
         public JWTAuthenticationManager(string tokenKey)
         {
@@ -28,7 +29,7 @@ namespace RyhmatyoBuuttiServer
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.Id.ToString()) }),
-                Expires = DateTime.UtcNow.AddMinutes(15),
+                Expires = tokenExpirationTime,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
