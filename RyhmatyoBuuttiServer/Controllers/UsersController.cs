@@ -8,7 +8,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using System.Net.Http.Headers;
 using System.Net.Http;
-using System.Security.Claims;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace RyhmatyoBuuttiServer.Controllers
 {
@@ -65,6 +65,7 @@ namespace RyhmatyoBuuttiServer.Controllers
         public IActionResult Login(UserLoginDTO model)
         {
             var user = UserRepository.findUserToAuthenticate(model.Email);
+            
             if (user == null || !BC.Verify(model.Password, user.Password))
             {
                 return BadRequest(new { message = "Invalid username or password." });
@@ -73,10 +74,23 @@ namespace RyhmatyoBuuttiServer.Controllers
             var jwtToken = JWTAuthenticationManager.generateJWT(user);
             var response = Mapper.Map<UserAuthenticateResponse>(user);
             response.JwtToken = jwtToken;
-            HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
-            return Ok(new { message = "Successfully logged in." });
+            return Ok(new { message = "Successfully logged in.", jwtToken });
+        }
+
+        [HttpPatch("users/{id:long}")]
+        public IActionResult UpdateUser(long id, JsonPatchDocument<UserUpdateDTO> userUpdates)
+        {
+            var user = UserRepository.findUser(id);
+            
+            if (user == null)
+            {
+                return NotFound();
+            }
+            Mapper.Map<JsonPatchDocument<User>>(userUpdates).ApplyTo(user);
+            UserRepository.UpdateUser(user);
+            
+            return Ok(new { message = "User updated successfully."});
         }
     }
 }
