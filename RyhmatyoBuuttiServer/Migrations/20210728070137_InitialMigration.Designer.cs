@@ -9,7 +9,7 @@ using RyhmatyoBuuttiServer;
 namespace RyhmatyoBuuttiServer.Migrations
 {
     [DbContext(typeof(UsersContext))]
-    [Migration("20210727070038_InitialMigration")]
+    [Migration("20210728070137_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

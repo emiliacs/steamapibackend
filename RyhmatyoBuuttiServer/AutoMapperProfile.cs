@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using RyhmatyoBuuttiServer.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +15,8 @@ namespace RyhmatyoBuuttiServer
         {
             CreateMap<UserRegistrationDTO, User>();
             CreateMap<User, UserAuthenticateResponse>();
+            CreateMap<JsonPatchDocument<UserUpdateDTO>, JsonPatchDocument<User>>();
+            CreateMap<Operation<UserUpdateDTO>, Operation<User>>();
         }
     }
 }

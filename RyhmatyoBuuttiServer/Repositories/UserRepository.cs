@@ -14,9 +14,20 @@ namespace RyhmatyoBuuttiServer.Repositories
             _context = context;
         }
 
+        public User findUser(long id)
+        {
+            return _context.Users.Find(id);
+        }
+
         public void AddUser(User newUser)
         {
             _context.Users.Add(newUser);
+            _context.SaveChanges();
+        }
+
+        public void UpdateUser(User user)
+        {
+            _context.Users.Update(user);
             _context.SaveChanges();
         }
 

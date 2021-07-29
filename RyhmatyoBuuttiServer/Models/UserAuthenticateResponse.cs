@@ -8,7 +8,7 @@ namespace RyhmatyoBuuttiServer.Models
 {
     public class UserAuthenticateResponse
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Email { get; set; }
         public string JwtToken { get; set; }
     }
