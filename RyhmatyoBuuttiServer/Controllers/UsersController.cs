@@ -6,8 +6,6 @@ using RyhmatyoBuuttiServer.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
-using System.Net.Http.Headers;
-using System.Net.Http;
 using Microsoft.AspNetCore.JsonPatch;
 
 namespace RyhmatyoBuuttiServer.Controllers
@@ -88,8 +86,9 @@ namespace RyhmatyoBuuttiServer.Controllers
                 return NotFound();
             }
             Mapper.Map<JsonPatchDocument<User>>(userUpdates).ApplyTo(user);
+
             UserRepository.UpdateUser(user);
-            
+
             return Ok(new { message = "User updated successfully."});
         }
     }
