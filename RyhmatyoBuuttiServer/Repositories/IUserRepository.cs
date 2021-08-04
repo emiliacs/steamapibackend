@@ -9,6 +9,7 @@ namespace RyhmatyoBuuttiServer.Repositories
         User findUser(long id);
         void AddUser(User newUser);
         void UpdateUser(User user);
+        void DeleteUser(User user);
         Boolean doesEmailExist(string email);
         Boolean doesUsernameExist(string username);
         public IEnumerable<User> getAllUsers();

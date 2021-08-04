@@ -31,6 +31,12 @@ namespace RyhmatyoBuuttiServer.Repositories
             _context.SaveChanges();
         }
 
+        public void DeleteUser(User user)
+        {
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+        }
+
         public Boolean doesEmailExist(string email)
         {
            return _context.Users.Any(u => u.Email == email);

@@ -112,5 +112,19 @@ namespace RyhmatyoBuuttiServer.Controllers
 
             return Ok(new { message = "User updated successfully." });
         }
+
+        [HttpDelete("users/{id:long}")]
+        public IActionResult DeleteUser(long id)
+        {
+            if (id != Convert.ToInt64(HttpContext.User.Identity.Name))
+            {
+                return Unauthorized(new { message = "Access denied." });
+            }
+
+            User user = UserRepository.findUser(id);
+            UserRepository.DeleteUser(user);
+
+            return Ok(new { message = "User deleted." });
+        }
     }
 }
