@@ -6,9 +6,9 @@ using RyhmatyoBuuttiServer.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
-using System.Net.Http.Headers;
-using System.Net.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Http;
+using System;
 
 namespace RyhmatyoBuuttiServer.Controllers
 {
@@ -54,10 +54,9 @@ namespace RyhmatyoBuuttiServer.Controllers
             }
 
             var user = Mapper.Map<User>(model);
-
             user.Password = BC.HashPassword(model.Password);
-
             UserRepository.AddUser(user);
+            
             return Ok(new { message = "Registration successful." });
         }
 
@@ -81,16 +80,37 @@ namespace RyhmatyoBuuttiServer.Controllers
         [HttpPatch("users/{id:long}")]
         public IActionResult UpdateUser(long id, JsonPatchDocument<UserUpdateDTO> userUpdates)
         {
-            var user = UserRepository.findUser(id);
-            
-            if (user == null)
+            if (id != Convert.ToInt64(HttpContext.User.Identity.Name))
             {
-                return NotFound();
+                return Unauthorized(new { message = "Access denied." });
             }
-            Mapper.Map<JsonPatchDocument<User>>(userUpdates).ApplyTo(user);
+
+            User user = UserRepository.findUser(id);
+            UserUpdateDTO updateDTO = new UserUpdateDTO
+            { Email = user.Email, Username = user.Username };
+            userUpdates.ApplyTo(updateDTO, ModelState);
+            TryValidateModel(updateDTO);
+
+            if (!updateDTO.Email.Equals(user.Email) && UserRepository.doesEmailExist(updateDTO.Email))
+            {
+                ModelState.AddModelError("Email exists", "This email already exists.");
+            }
+
+            if (!updateDTO.Username.Equals(user.Username) && UserRepository.doesUsernameExist(updateDTO.Username))
+            {
+                ModelState.AddModelError("Username exists", "This username already exists.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            user.Email = updateDTO.Email;
+            user.Username = updateDTO.Username;
             UserRepository.UpdateUser(user);
-            
-            return Ok(new { message = "User updated successfully."});
+
+            return Ok(new { message = "User updated successfully." });
         }
     }
 }
