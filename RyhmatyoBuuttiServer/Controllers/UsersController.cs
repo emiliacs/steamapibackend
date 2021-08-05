@@ -126,5 +126,34 @@ namespace RyhmatyoBuuttiServer.Controllers
 
             return Ok(new { message = "User deleted." });
         }
+
+        [HttpPatch("users/{id:long}/changepassword")]
+        public IActionResult ChangePassword(long id, JsonPatchDocument<UserPasswordChangeDTO> passwordUpdates)
+        {
+            if (id != Convert.ToInt64(HttpContext.User.Identity.Name))
+            {
+                return Unauthorized(new { message = "Access denied." });
+            }
+
+            User user = UserRepository.findUser(id);
+            UserPasswordChangeDTO passwordChangeDTO = new UserPasswordChangeDTO();
+            passwordUpdates.ApplyTo(passwordChangeDTO, ModelState);
+
+            if(!BC.Verify(passwordChangeDTO.CurrentPassword, user.Password))
+            {
+                ModelState.AddModelError("Invalid current password", "Invalid current password.");
+            }
+
+            TryValidateModel(passwordChangeDTO);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            user.Password = BC.HashPassword(passwordChangeDTO.NewPassword);
+            UserRepository.UpdateUser(user);
+
+            return Ok(new { message = "Password changed successfully." });
+        }
     }
 }
