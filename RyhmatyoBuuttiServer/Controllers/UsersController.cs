@@ -63,18 +63,18 @@ namespace RyhmatyoBuuttiServer.Controllers
         [HttpPost("login")]
         public IActionResult Login(UserLoginDTO model)
         {
-            var user = UserRepository.findUserToAuthenticate(model.Email);
+            var loginUser = UserRepository.findUserToAuthenticate(model.Email);
             
-            if (user == null || !BC.Verify(model.Password, user.Password))
+            if (loginUser == null || !BC.Verify(model.Password, loginUser.Password))
             {
                 return BadRequest(new { message = "Invalid username or password." });
             }
 
-            var jwtToken = JWTAuthenticationManager.generateJWT(user);
-            var response = Mapper.Map<UserAuthenticateResponse>(user);
-            response.JwtToken = jwtToken;
+            var jwtToken = JWTAuthenticationManager.generateJWT(loginUser);
+            var user = Mapper.Map<UserAuthenticateResponse>(loginUser);
+            user.JwtToken = jwtToken;
 
-            return Ok(new { message = "Successfully logged in.", jwtToken });
+            return Ok(new { message = "Successfully logged in.", user });
         }
 
         [HttpPatch("users/{id:long}")]
