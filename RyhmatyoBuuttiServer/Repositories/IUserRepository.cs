@@ -7,6 +7,7 @@ namespace RyhmatyoBuuttiServer.Repositories
     public interface IUserRepository
     {
         User findUser(long id);
+        User findUserByEmail(string email);
         void AddUser(User newUser);
         void UpdateUser(User user);
         void DeleteUser(User user);

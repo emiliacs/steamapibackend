@@ -7,9 +7,9 @@ namespace RyhmatyoBuuttiServer.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly UsersContext _context;
+        private readonly DataContext _context;
 
-        public UserRepository(UsersContext context)
+        public UserRepository(DataContext context)
         {
             _context = context;
         }
@@ -17,6 +17,11 @@ namespace RyhmatyoBuuttiServer.Repositories
         public User findUser(long id)
         {
             return _context.Users.Find(id);
+        }
+
+        public User findUserByEmail(string email)
+        {
+            return _context.Users.FirstOrDefault(u => u.Email == email);
         }
 
         public void AddUser(User newUser)

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Http;
 using System;
+using RyhmatyoBuuttiServer.Services;
 
 namespace RyhmatyoBuuttiServer.Controllers
 {
@@ -17,13 +18,17 @@ namespace RyhmatyoBuuttiServer.Controllers
     public class UsersController : ControllerBase
     {
         private IUserRepository UserRepository;
+        private IResetCodeRepository ResetCodeRepository;
         private IMapper Mapper;
         private IJWTAuthenticationManager JWTAuthenticationManager;
-        public UsersController(IUserRepository iUserRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager)
+        private IEmailService EmailService;
+        public UsersController(IUserRepository iUserRepository, IResetCodeRepository iResetCodeRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager, IEmailService iEmailService)
         {
             UserRepository = iUserRepository;
+            ResetCodeRepository = iResetCodeRepository;
             Mapper = iMapper;
             JWTAuthenticationManager = iJWTAuthenticationManager;
+            EmailService = iEmailService;
         }
 
         [Authorize]
@@ -154,6 +159,56 @@ namespace RyhmatyoBuuttiServer.Controllers
             UserRepository.UpdateUser(user);
 
             return Ok(new { message = "Password changed successfully." });
+        }
+
+        [HttpPut("users/forgottenpassword")]
+        public IActionResult RequestPasswordResetCode(UserForgottenPasswordDTO model)
+        {
+            User user = UserRepository.findUserByEmail(model.Email);
+
+            if (user == null)
+            {
+                return Ok(new { message = "Password reset code sent to email: " + model.Email });
+            }
+
+            string resetCode = "";
+            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            int resetCodeLength = 8;
+            int resetCodeExpirationTime = 24;
+            
+            for (int i = 0; i < resetCodeLength; i++)
+            {
+                resetCode += chars[new Random().Next(chars.Length)];
+            }
+
+            PasswordResetCode prc = ResetCodeRepository.findResetCodeByUserId(user.Id);
+            
+            if (prc == null)
+            {
+                prc = new PasswordResetCode { UserId = user.Id, Code = BC.HashPassword(resetCode), ExpirationTime = DateTime.Now.AddHours(resetCodeExpirationTime) };
+                ResetCodeRepository.AddResetCode(prc);
+            }
+            
+            else
+            {
+                prc.Code = BC.HashPassword(resetCode);
+                prc.ExpirationTime = DateTime.Now.AddHours(resetCodeExpirationTime);
+                ResetCodeRepository.UpdateResetCode(prc);
+            }
+
+            string message = "Hello!\n\n" +
+                "Here is the code for resetting password of your user account in Ryhmatyo Buutti application.\n\n" +
+                "The code is: " + resetCode + "\n\n" +
+                "The code is valid for the next 24 hours.\n\n" +
+                "Best,\n" +
+                "Ryhmatyo Buutti team";
+            EmailService.Send(
+                to: user.Email,
+                subject: "Ryhmatyo Buutti - Reset Password",
+                text: message
+                );
+
+            return Ok(new { message = "Password reset code sent to email: " + user.Email });
         }
     }
 }

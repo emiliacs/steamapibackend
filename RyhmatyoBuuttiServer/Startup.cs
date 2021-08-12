@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RyhmatyoBuuttiServer.Repositories;
+using RyhmatyoBuuttiServer.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,8 +31,10 @@ namespace RyhmatyoBuuttiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<UsersContext>(options => options.UseNpgsql(@"Server=PostgreSQL 13;Host=localhost;Port=5432;Username=postgres;Password=superuser;Database=db_ryhmatyo_buutti"));
+            services.AddDbContext<DataContext>(options => options.UseNpgsql(@"Server=PostgreSQL 13;Host=localhost;Port=5432;Username=postgres;Password=superuser;Database=db_ryhmatyo_buutti"));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IResetCodeRepository, ResetCodeRepository>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddControllers().AddNewtonsoftJson();
             var tokenKey = Configuration.GetValue<string>("TokenKey");
             var key = Encoding.ASCII.GetBytes(tokenKey);
