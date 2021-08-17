@@ -10,7 +10,7 @@ using RyhmatyoBuuttiServer;
 namespace RyhmatyoBuuttiServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210812100316_InitialMigration")]
+    [Migration("20210816080926_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,27 +20,6 @@ namespace RyhmatyoBuuttiServer.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.8")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-            modelBuilder.Entity("RyhmatyoBuuttiServer.Models.PasswordResetCode", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<string>("Code")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ExpirationTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ResetCode");
-                });
 
             modelBuilder.Entity("RyhmatyoBuuttiServer.Models.User", b =>
                 {
@@ -54,6 +33,12 @@ namespace RyhmatyoBuuttiServer.Migrations
 
                     b.Property<string>("Password")
                         .HasColumnType("text");
+
+                    b.Property<string>("ResetCode")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ResetCodeExpires")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Username")
                         .HasColumnType("text");

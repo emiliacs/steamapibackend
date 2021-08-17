@@ -18,14 +18,12 @@ namespace RyhmatyoBuuttiServer.Controllers
     public class UsersController : ControllerBase
     {
         private IUserRepository UserRepository;
-        private IResetCodeRepository ResetCodeRepository;
         private IMapper Mapper;
         private IJWTAuthenticationManager JWTAuthenticationManager;
         private IEmailService EmailService;
-        public UsersController(IUserRepository iUserRepository, IResetCodeRepository iResetCodeRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager, IEmailService iEmailService)
+        public UsersController(IUserRepository iUserRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager, IEmailService iEmailService)
         {
             UserRepository = iUserRepository;
-            ResetCodeRepository = iResetCodeRepository;
             Mapper = iMapper;
             JWTAuthenticationManager = iJWTAuthenticationManager;
             EmailService = iEmailService;
@@ -161,7 +159,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             return Ok(new { message = "Password changed successfully." });
         }
 
-        [HttpPut("users/forgottenpassword")]
+        [HttpPost("forgottenpassword")]
         public IActionResult RequestPasswordResetCode(UserForgottenPasswordDTO model)
         {
             User user = UserRepository.findUserByEmail(model.Email);
@@ -174,27 +172,16 @@ namespace RyhmatyoBuuttiServer.Controllers
             string resetCode = "";
             string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             int resetCodeLength = 8;
-            int resetCodeExpirationTime = 24;
-            
+            int expiresInHours = 24;
+
             for (int i = 0; i < resetCodeLength; i++)
             {
                 resetCode += chars[new Random().Next(chars.Length)];
             }
 
-            PasswordResetCode prc = ResetCodeRepository.findResetCodeByUserId(user.Id);
-            
-            if (prc == null)
-            {
-                prc = new PasswordResetCode { UserId = user.Id, Code = BC.HashPassword(resetCode), ExpirationTime = DateTime.Now.AddHours(resetCodeExpirationTime) };
-                ResetCodeRepository.AddResetCode(prc);
-            }
-            
-            else
-            {
-                prc.Code = BC.HashPassword(resetCode);
-                prc.ExpirationTime = DateTime.Now.AddHours(resetCodeExpirationTime);
-                ResetCodeRepository.UpdateResetCode(prc);
-            }
+            user.ResetCode = BC.HashPassword(resetCode);
+            user.ResetCodeExpires = DateTime.Now.AddHours(expiresInHours);
+            UserRepository.UpdateUser(user);
 
             string message = "Hello!\n\n" +
                 "Here is the code for resetting password of your user account in Ryhmatyo Buutti application.\n\n" +
@@ -209,6 +196,35 @@ namespace RyhmatyoBuuttiServer.Controllers
                 );
 
             return Ok(new { message = "Password reset code sent to email: " + user.Email });
+        }
+
+        [HttpPatch("resetpassword")]
+        public IActionResult ResetPassword(JsonPatchDocument<UserPasswordResetDTO> passwordUpdates)
+        {
+            UserPasswordResetDTO passwordResetDTO = new UserPasswordResetDTO();
+            passwordUpdates.ApplyTo(passwordResetDTO, ModelState);
+            User user = UserRepository.findUserByEmail(passwordResetDTO.Email);
+
+            if (user == null || user.ResetCode == null || user.ResetCodeExpires == null 
+                || passwordResetDTO.ResetCode == null || !BC.Verify(passwordResetDTO.ResetCode, user.ResetCode) 
+                || DateTime.Now > user.ResetCodeExpires)
+            {
+                ModelState.AddModelError("Invalid user input", "Invalid user email or reset code.");
+            }
+
+            TryValidateModel(passwordResetDTO);
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            user.Password = BC.HashPassword(passwordResetDTO.NewPassword);
+            user.ResetCode = null;
+            user.ResetCodeExpires = null;
+            UserRepository.UpdateUser(user);
+
+            return Ok(new { message = "Password reset successfully. You can now log in with that password." });
         }
     }
 }
