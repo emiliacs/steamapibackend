@@ -159,7 +159,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             return Ok(new { message = "Password changed successfully." });
         }
 
-        [HttpPost("forgottenpassword")]
+        [HttpPost("users/forgottenpassword")]
         public IActionResult RequestPasswordResetCode(UserForgottenPasswordDTO model)
         {
             User user = UserRepository.findUserByEmail(model.Email);
@@ -198,7 +198,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             return Ok(new { message = "Password reset code sent to email: " + user.Email });
         }
 
-        [HttpPatch("resetpassword")]
+        [HttpPatch("users/resetpassword")]
         public IActionResult ResetPassword(JsonPatchDocument<UserPasswordResetDTO> passwordUpdates)
         {
             UserPasswordResetDTO passwordResetDTO = new UserPasswordResetDTO();
@@ -209,7 +209,7 @@ namespace RyhmatyoBuuttiServer.Controllers
                 || passwordResetDTO.ResetCode == null || !BC.Verify(passwordResetDTO.ResetCode, user.ResetCode) 
                 || DateTime.Now > user.ResetCodeExpires)
             {
-                ModelState.AddModelError("Invalid user input", "Invalid user email or reset code.");
+                ModelState.AddModelError("Invalid user input", "Invalid user email address or reset code.");
             }
 
             TryValidateModel(passwordResetDTO);
