@@ -33,6 +33,7 @@ namespace RyhmatyoBuuttiServer
         {
             services.AddDbContext<DataContext>(options => options.UseNpgsql(@"Server=PostgreSQL 13;Host=localhost;Port=5432;Username=postgres;Password=superuser;Database=db_ryhmatyo_buutti"));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddControllers().AddNewtonsoftJson();
             var tokenKey = Configuration.GetValue<string>("TokenKey");

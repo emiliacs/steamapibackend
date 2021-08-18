@@ -41,6 +41,15 @@ namespace RyhmatyoBuuttiServer.Migrations
                     b.Property<string>("Username")
                         .HasColumnType("text");
 
+                    b.Property<string>("VerificationCode")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("VerificationCodeExpires")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("Verified")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Id");
 
                     b.ToTable("User");

@@ -56,10 +56,5 @@ namespace RyhmatyoBuuttiServer.Repositories
         {
             return _context.Users;
         }
-
-        public User findUserToAuthenticate(string email)
-        {
-            return _context.Users.SingleOrDefault(x => x.Email == email);
-        }
     }
 }

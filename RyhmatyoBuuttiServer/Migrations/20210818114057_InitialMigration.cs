@@ -18,7 +18,10 @@ namespace RyhmatyoBuuttiServer.Migrations
                     Username = table.Column<string>(type: "text", nullable: true),
                     Password = table.Column<string>(type: "text", nullable: true),
                     ResetCode = table.Column<string>(type: "text", nullable: true),
-                    ResetCodeExpires = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                    ResetCodeExpires = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    Verified = table.Column<bool>(type: "boolean", nullable: false),
+                    VerificationCode = table.Column<string>(type: "text", nullable: true),
+                    VerificationCodeExpires = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
