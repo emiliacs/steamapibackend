@@ -267,14 +267,9 @@ namespace RyhmatyoBuuttiServer.Controllers
             verificationUpdates.ApplyTo(verificationDTO, ModelState);
             User user = UserRepository.findUserByEmail(verificationDTO.Email);
 
-            if (user == null || user.Verified || !BC.Verify(verificationDTO.VerificationCode, user.VerificationCode))
+            if (user == null || user.Verified || !BC.Verify(verificationDTO.VerificationCode, user.VerificationCode) || DateTime.Now > user.VerificationCodeExpires)
             {
-                ModelState.AddModelError("Invalid user input", "Invalid user email address, invalid verification code or this user is already verified.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
+                return BadRequest(new { message = "Invalid user email address or verification code or this user is already verified." });
             }
 
             user.Verified = true;
