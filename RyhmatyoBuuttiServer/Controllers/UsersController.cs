@@ -20,12 +20,15 @@ namespace RyhmatyoBuuttiServer.Controllers
         private IUserRepository UserRepository;
         private IMapper Mapper;
         private IJWTAuthenticationManager JWTAuthenticationManager;
+        private IUserService UserService;
         private IEmailService EmailService;
-        public UsersController(IUserRepository iUserRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager, IEmailService iEmailService)
+        private readonly int verificationCodeLength = 8, resetCodeLength = 8, expiresInHours = 24;
+        public UsersController(IUserRepository iUserRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager, IUserService iUserService, IEmailService iEmailService)
         {
             UserRepository = iUserRepository;
             Mapper = iMapper;
             JWTAuthenticationManager = iJWTAuthenticationManager;
+            UserService = iUserService;
             EmailService = iEmailService;
         }
 
@@ -58,19 +61,36 @@ namespace RyhmatyoBuuttiServer.Controllers
 
             var user = Mapper.Map<User>(model);
             user.Password = BC.HashPassword(model.Password);
-            UserRepository.AddUser(user);
+
+            string verificationCode = UserService.GenerateAccessCode(verificationCodeLength);
+            user.VerificationCode = BC.HashPassword(verificationCode);
+            user.VerificationCodeExpires = DateTime.Now.AddHours(expiresInHours);
             
-            return Ok(new { message = "Registration successful." });
+            UserRepository.AddUser(user);
+
+            string message = EmailService.welcomeMessage(verificationCode);
+            EmailService.Send(
+                to: user.Email,
+                subject: "Ryhmatyo Buutti - Registration - Verify your user account",
+                text: message
+                );
+
+            return Ok(new { message = "User registered successfully. Please check your email address to verify the user account." });
         }
 
         [HttpPost("login")]
         public IActionResult Login(UserLoginDTO model)
         {
-            var loginUser = UserRepository.findUserToAuthenticate(model.Email);
+            User loginUser = UserRepository.findUserByEmail(model.Email);
             
             if (loginUser == null || !BC.Verify(model.Password, loginUser.Password))
             {
                 return BadRequest(new { message = "Invalid username or password." });
+            }
+
+            if (!loginUser.Verified)
+            {
+                return Unauthorized(new { message = "User not verified. Please verify your user account and log in again." });
             }
 
             var jwtToken = JWTAuthenticationManager.generateJWT(loginUser);
@@ -92,6 +112,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             UserUpdateDTO updateDTO = new UserUpdateDTO
             { Email = user.Email, Username = user.Username };
             userUpdates.ApplyTo(updateDTO, ModelState);
+            
             TryValidateModel(updateDTO);
 
             if (!updateDTO.Email.Equals(user.Email) && UserRepository.doesEmailExist(updateDTO.Email))
@@ -148,6 +169,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             }
 
             TryValidateModel(passwordChangeDTO);
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest();
@@ -169,26 +191,12 @@ namespace RyhmatyoBuuttiServer.Controllers
                 return Ok(new { message = "Password reset code sent to email: " + model.Email });
             }
 
-            string resetCode = "";
-            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            int resetCodeLength = 8;
-            int expiresInHours = 24;
-
-            for (int i = 0; i < resetCodeLength; i++)
-            {
-                resetCode += chars[new Random().Next(chars.Length)];
-            }
-
+            string resetCode = UserService.GenerateAccessCode(resetCodeLength);
             user.ResetCode = BC.HashPassword(resetCode);
             user.ResetCodeExpires = DateTime.Now.AddHours(expiresInHours);
             UserRepository.UpdateUser(user);
 
-            string message = "Hello!\n\n" +
-                "Here is the code for resetting password of your user account in Ryhmatyo Buutti application.\n\n" +
-                "The code is: " + resetCode + "\n\n" +
-                "The code is valid for the next 24 hours.\n\n" +
-                "Best,\n" +
-                "Ryhmatyo Buutti team";
+            string message = EmailService.passwordResetCodeMessage(resetCode);
             EmailService.Send(
                 to: user.Email,
                 subject: "Ryhmatyo Buutti - Reset Password",
@@ -225,6 +233,58 @@ namespace RyhmatyoBuuttiServer.Controllers
             UserRepository.UpdateUser(user);
 
             return Ok(new { message = "Password reset successfully. You can now log in with that password." });
+        }
+
+        [HttpPost("users/newverificationcode")]
+        public IActionResult RequestNewVerificationCode(UserForgottenPasswordDTO model)
+        {
+            User user = UserRepository.findUserByEmail(model.Email);
+
+            if (user == null || user.Verified)
+            {
+                return Ok(new { message = "New verification code sent to email: " + model.Email });
+            }
+
+            string newCode = UserService.GenerateAccessCode(verificationCodeLength);
+            user.VerificationCode = BC.HashPassword(newCode);
+            user.VerificationCodeExpires = DateTime.Now.AddHours(expiresInHours);
+            UserRepository.UpdateUser(user);
+
+            string message = EmailService.newVerificationCodeMessage(newCode);
+            EmailService.Send(
+                to: user.Email,
+                subject: "Ryhmatyo Buutti - Verify your user account",
+                text: message
+                );
+
+            return Ok(new { message = "New verification code sent to email: " + model.Email });
+        }
+
+        [HttpPatch("users/verify")]
+        public IActionResult VerifyUser(JsonPatchDocument<UserVerificationDTO> verificationUpdates) 
+        {
+            UserVerificationDTO verificationDTO = new UserVerificationDTO();
+            verificationUpdates.ApplyTo(verificationDTO, ModelState);
+            User user = UserRepository.findUserByEmail(verificationDTO.Email);
+
+            if (user == null || user.Verified || !BC.Verify(verificationDTO.VerificationCode, user.VerificationCode) || DateTime.Now > user.VerificationCodeExpires)
+            {
+                return BadRequest(new { message = "Invalid user email address or verification code or this user is already verified." });
+            }
+
+            user.Verified = true;
+            user.VerificationCode = null;
+            user.VerificationCodeExpires = null;
+            UserRepository.UpdateUser(user);
+
+            string message = EmailService.userVerifiedMessage();
+            EmailService.Send(
+                to: user.Email,
+                subject: "Ryhmatyo Buutti - User account verified",
+                text: message
+                );
+
+            return Ok(new { message = "User account successfully verified. You can now log in." });
         }
     }
 }

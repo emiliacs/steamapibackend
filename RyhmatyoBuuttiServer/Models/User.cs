@@ -10,5 +10,8 @@ namespace RyhmatyoBuuttiServer.Models
         public string Password { get; set; }
         public string ResetCode { get; set; }
         public DateTime? ResetCodeExpires { get; set; }
+        public bool Verified { get; set; } = false;
+        public string VerificationCode { get; set; }
+        public DateTime? VerificationCodeExpires { get; set; }
     }
 }
