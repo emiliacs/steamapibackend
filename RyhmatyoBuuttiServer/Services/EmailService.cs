@@ -3,6 +3,7 @@ using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Text;
+using System;
 
 namespace RyhmatyoBuuttiServer.Services
 {
@@ -29,14 +30,14 @@ namespace RyhmatyoBuuttiServer.Services
         {
 
             var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse(from ?? Configuration.GetValue<string>("EmailFrom")));
+            email.From.Add(MailboxAddress.Parse(from ?? Environment.GetEnvironmentVariable("EMAIL_FROM")));
             email.To.Add(MailboxAddress.Parse(to));
             email.Subject = subject;
             email.Body = new TextPart(TextFormat.Plain) { Text = text };
 
             var smtp = new SmtpClient();
-            smtp.Connect(Configuration.GetValue<string>("SmtpHost"), Configuration.GetValue<int>("SmtpPort"), SecureSocketOptions.StartTls);
-            smtp.Authenticate(Configuration.GetValue<string>("SmtpUser"), Configuration.GetValue<string>("SmtpPass"));
+            smtp.Connect(Environment.GetEnvironmentVariable("SMTP_HOST"), Int32.Parse(Environment.GetEnvironmentVariable("SMTP_PORT")), SecureSocketOptions.StartTls);
+            smtp.Authenticate(Environment.GetEnvironmentVariable("SMTP_USER"), Environment.GetEnvironmentVariable("SMTP_PASS"));
             smtp.Send(email);
             smtp.Disconnect(true);
         }
