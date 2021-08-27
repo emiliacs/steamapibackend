@@ -19,16 +19,9 @@ namespace RyhmatyoBuuttiServer.Services
     public class EmailService : IEmailService
     {
         private string message;
-        public IConfiguration Configuration { get; }
-
-        public EmailService(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
 
         public void Send(string to, string subject, string text, string from = null)
         {
-
             var email = new MimeMessage();
             email.From.Add(MailboxAddress.Parse(from ?? Environment.GetEnvironmentVariable("EMAIL_FROM")));
             email.To.Add(MailboxAddress.Parse(to));

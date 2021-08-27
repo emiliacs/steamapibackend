@@ -34,9 +34,9 @@ namespace RyhmatyoBuuttiServer.Controllers
 
         [Authorize]
         [HttpGet("users")]
-        public IEnumerable<User> getAllUsers()
+        public IActionResult GetAllUsers()
         {
-            return UserRepository.getAllUsers();
+            return Ok(UserRepository.getAllUsers());
         }
 
         [HttpPost("register")]
