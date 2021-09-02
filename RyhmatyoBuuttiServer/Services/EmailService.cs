@@ -28,16 +28,15 @@ namespace RyhmatyoBuuttiServer.Services
 
         public void Send(string to, string subject, string text, string from = null)
         {
-
             var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse(from ?? Environment.GetEnvironmentVariable("EMAIL_FROM")));
+            email.From.Add(MailboxAddress.Parse(from ?? Configuration.GetValue<string>("EmailFrom")));
             email.To.Add(MailboxAddress.Parse(to));
             email.Subject = subject;
             email.Body = new TextPart(TextFormat.Plain) { Text = text };
 
             var smtp = new SmtpClient();
-            smtp.Connect(Environment.GetEnvironmentVariable("SMTP_HOST"), Int32.Parse(Environment.GetEnvironmentVariable("SMTP_PORT")), SecureSocketOptions.StartTls);
-            smtp.Authenticate(Environment.GetEnvironmentVariable("SMTP_USER"), Environment.GetEnvironmentVariable("SMTP_PASS"));
+            smtp.Connect(Configuration.GetValue<string>("SmtpHost"), Configuration.GetValue<int>("SmtpPort"), SecureSocketOptions.StartTls);
+            smtp.Authenticate(Configuration.GetValue<string>("SmtpUser"), Configuration.GetValue<string>("SmtpPass"));
             smtp.Send(email);
             smtp.Disconnect(true);
         }
