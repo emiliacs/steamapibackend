@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
 using RyhmatyoBuuttiServer.Models;
@@ -28,50 +29,6 @@ namespace RyhmatyoBuuttiServer.UnitTests
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
         }
-        
-        [Test]
-        public void Register_NewUser_ReturnsOk()
-        {
-            UserRegistrationDTO userToRegister = new UserRegistrationDTO
-            {
-                Email = "mattimeikalainen@example.com",
-                Username = "Matti Meikäläinen",
-                Password = "salasana",
-                ConfirmPassword = "salasana"
-            };
-
-            var mockRepo = new Mock<IUserRepository>();
-            var mockMapper = new Mock<IMapper>();
-            var mockUserService = new Mock<UserService>();
-            var mockEmailService = new Mock<EmailService>();
-            mockRepo.Setup(repo => repo.AddUser(It.IsAny<User>()));
-            mockMapper.Setup(mapper => mapper.Map<User>(userToRegister)).Returns(new User());
-            var controller = new UserController(mockRepo.Object, mockMapper.Object, null, mockUserService.Object, mockEmailService.Object);
-
-            var result = controller.Register(userToRegister);
-            var okResult = result as OkObjectResult;
-
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-        }
-
-        public void Login_CorrectUsernameAndPassword_ReturnsOk()
-        {
-            UserLoginDTO userToRegister = new UserLoginDTO
-            {
-                Email = "mattimeikalainen@example.com",
-                Password = "salasana"
-            };
-        }
-
-        public void UpdateUser_CorrectEmailAndUsernameWithAuthorization_ReturnsOk()
-        {
-            UserUpdateDTO userToUpdate = new UserUpdateDTO
-            {
-                Email = "mattimeika@example.com",
-                Username = "Matti Meikä"
-            };
-        }
 
         [Test]
         public void DeleteUser_AuthorizedUserDeletesOwnAccount_ReturnsOk()
@@ -97,16 +54,6 @@ namespace RyhmatyoBuuttiServer.UnitTests
             Assert.AreEqual(200, okResult.StatusCode);
         }
 
-        public void ChangePassword_CorrectCurrentPasswordAndValidNewPassword_ReturnsOk()
-        {
-            UserPasswordChangeDTO passwordChangeDTO = new UserPasswordChangeDTO
-            {
-                CurrentPassword = "salasana",
-                NewPassword = "password",
-                ConfirmNewPassword = "password"
-            };
-        }
-
         private IEnumerable<User> GetTestUsers()
         {
             var users = new List<User>();
@@ -115,7 +62,7 @@ namespace RyhmatyoBuuttiServer.UnitTests
                 Id = 1,
                 Email = "testuser1@example.com",
                 Username = "Test User1",
-                Password = "password1",
+                Password = "$2a$11$XdsLZ.oCvMLg2vhJCkIFaeIy4lwipEZs6QeA3efzuoToOAARqZyFy",
                 ResetCode = "ABcd1234",
                 ResetCodeExpires = System.DateTime.Now.AddHours(24),
                 Verified = true,
@@ -128,7 +75,7 @@ namespace RyhmatyoBuuttiServer.UnitTests
                 Id = 2,
                 Email = "testtester@example.com",
                 Username = "Test Tester",
-                Password = "password2",
+                Password = "$2a$11$kPe4ZqGHOOMmBYYC0SKF2.OV1wG0DexoZ/.odCV4suXKFM0b3wzSG",
                 ResetCode = null,
                 ResetCodeExpires = null,
                 Verified = false,

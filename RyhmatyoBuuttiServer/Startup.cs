@@ -31,12 +31,12 @@ namespace RyhmatyoBuuttiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(options => options.UseNpgsql(@$"Server={Environment.GetEnvironmentVariable("DB_SERVER")};Host={Environment.GetEnvironmentVariable("DB_HOST")};Port={Environment.GetEnvironmentVariable("DB_PORT")};Username={Environment.GetEnvironmentVariable("DB_USERNAME")};Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};Database={Environment.GetEnvironmentVariable("DB_DATABASE")}"));
+            services.AddDbContext<DataContext>(options => options.UseNpgsql(@"Server=PostgreSQL 13;Host=localhost;Port=5432;Username=postgres;Password=superuser;Database=db_ryhmatyo_buutti"));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddControllers().AddNewtonsoftJson();
-            var tokenKey = Environment.GetEnvironmentVariable("TOKEN_KEY");
+            var tokenKey = Configuration.GetValue<string>("TokenKey");
             var key = Encoding.ASCII.GetBytes(tokenKey);
 
             services.AddAuthentication(x =>

@@ -10,7 +10,7 @@ using RyhmatyoBuuttiServer;
 namespace RyhmatyoBuuttiServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210818114057_InitialMigration")]
+    [Migration("20210902110535_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -18,7 +18,7 @@ namespace RyhmatyoBuuttiServer.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.8")
+                .HasAnnotation("ProductVersion", "5.0.9")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("RyhmatyoBuuttiServer.Models.User", b =>
