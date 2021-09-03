@@ -1,0 +1,23 @@
+image: mcr.microsoft.com/dotnet/sdk:5.0
+
+stages:
+    - build
+    - test
+
+variables:
+    test: "RyhmatyoBuuttiServer.UnitTests"
+
+before_script:
+    - "dotnet restore RyhmatyoBuuttiServer.sln"
+
+build:
+    stage: build
+    script:
+        - dotnet restore RyhmatyoBuuttiServer.sln
+        - dotnet build RyhmatyoBuuttiServer.sln
+
+test:
+    stage: test
+    script:
+        - "cd $test"
+        - "dotnet test"
