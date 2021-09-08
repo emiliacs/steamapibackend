@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace RyhmatyoBuuttiServer.Models
 {
-    public class UserSteamIdDTO
+    public class UserAddSteamIdDTO
     {
         public string SteamId { get; set; }
     }

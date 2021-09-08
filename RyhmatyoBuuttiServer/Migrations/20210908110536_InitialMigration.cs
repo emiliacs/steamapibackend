@@ -21,7 +21,8 @@ namespace RyhmatyoBuuttiServer.Migrations
                     ResetCodeExpires = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     Verified = table.Column<bool>(type: "boolean", nullable: false),
                     VerificationCode = table.Column<string>(type: "text", nullable: true),
-                    VerificationCodeExpires = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                    VerificationCodeExpires = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    SteamId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

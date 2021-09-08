@@ -10,7 +10,7 @@ using RyhmatyoBuuttiServer;
 namespace RyhmatyoBuuttiServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210902110535_InitialMigration")]
+    [Migration("20210908110536_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace RyhmatyoBuuttiServer.Migrations
 
                     b.Property<DateTime?>("ResetCodeExpires")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("SteamId")
+                        .HasColumnType("text");
 
                     b.Property<string>("Username")
                         .HasColumnType("text");

@@ -21,14 +21,14 @@ namespace RyhmatyoBuuttiServer.Controllers
         }
 
         [HttpPatch("addsteamid")]
-        public IActionResult AddSteamIdToUser(long id, JsonPatchDocument<UserSteamIdDTO> userUpdates)
+        public IActionResult AddSteamIdToUser(long id, JsonPatchDocument<UserAddSteamIdDTO> userUpdates)
         {
             User user = UserRepository.findUser(id);
-            UserSteamIdDTO steamIdDTO = new UserSteamIdDTO
+            UserAddSteamIdDTO addSteamIdDTO = new UserAddSteamIdDTO
             { SteamId = user.SteamId };
-            userUpdates.ApplyTo(steamIdDTO);
+            userUpdates.ApplyTo(addSteamIdDTO);
 
-            user.SteamId = steamIdDTO.SteamId;
+            user.SteamId = addSteamIdDTO.SteamId;
             UserRepository.UpdateUser(user);
 
             return Ok(new { message = "Steam ID added to user." });
