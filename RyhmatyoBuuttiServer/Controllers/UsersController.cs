@@ -286,5 +286,32 @@ namespace RyhmatyoBuuttiServer.Controllers
 
             return Ok(new { message = "User account successfully verified. You can now log in." });
         }
+
+        [HttpPatch("users/{id:long}/addsteamid")]
+        public IActionResult AddSteamIdToUser(long id, JsonPatchDocument<UserAddSteamIdDTO> userUpdates)
+        {
+            User user = UserRepository.findUser(id);
+            
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            UserAddSteamIdDTO addSteamIdDTO = new UserAddSteamIdDTO
+            { SteamId = user.SteamId };
+            userUpdates.ApplyTo(addSteamIdDTO);
+
+            TryValidateModel(addSteamIdDTO);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            user.SteamId = addSteamIdDTO.SteamId;
+            UserRepository.UpdateUser(user);
+
+            return Ok(new { message = "Steam ID added to user." });
+        }
     }
 }

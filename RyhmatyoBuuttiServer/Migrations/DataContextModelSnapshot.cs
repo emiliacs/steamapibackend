@@ -38,6 +38,9 @@ namespace RyhmatyoBuuttiServer.Migrations
                     b.Property<DateTime?>("ResetCodeExpires")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("SteamId")
+                        .HasColumnType("text");
+
                     b.Property<string>("Username")
                         .HasColumnType("text");
 

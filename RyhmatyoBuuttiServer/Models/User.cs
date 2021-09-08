@@ -13,5 +13,6 @@ namespace RyhmatyoBuuttiServer.Models
         public bool Verified { get; set; } = false;
         public string VerificationCode { get; set; }
         public DateTime? VerificationCodeExpires { get; set; }
+        public string SteamId { get; set; }
     }
 }
