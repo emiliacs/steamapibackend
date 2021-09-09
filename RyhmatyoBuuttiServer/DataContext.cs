@@ -11,6 +11,10 @@ namespace RyhmatyoBuuttiServer
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().ToTable("User");
+            modelBuilder.Entity<Game>().ToTable("Game");
+            modelBuilder.Entity<Publisher>().ToTable("Publisher");
+            modelBuilder.Entity<Developer>().ToTable("Developer");
+            modelBuilder.Entity<Genre>().ToTable("Genre");
         }
 
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RyhmatyoBuuttiServer.Models
 {
@@ -14,5 +15,7 @@ namespace RyhmatyoBuuttiServer.Models
         public string VerificationCode { get; set; }
         public DateTime? VerificationCodeExpires { get; set; }
         public string SteamId { get; set; }
+
+        public ICollection<Game> Games { get; set; }
     }
 }
