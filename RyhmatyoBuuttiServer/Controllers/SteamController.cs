@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RyhmatyoBuuttiServer.Models;
 using RyhmatyoBuuttiServer.Repositories;
+using RyhmatyoBuuttiServer.Services;
 using System;
 using System.Net.Http;
 
@@ -17,11 +18,13 @@ namespace RyhmatyoBuuttiServer.Controllers
     {
         public IConfiguration Configuration { get; }
         private IUserRepository UserRepository;
+        private ISteamService SteamService;
 
-        public SteamController(IConfiguration configuration, IUserRepository iUserRepository)
+        public SteamController(IConfiguration configuration, IUserRepository iUserRepository, ISteamService iSteamService)
         {
             Configuration = configuration;
             UserRepository = iUserRepository;
+            SteamService = iSteamService;
         }
 
         [HttpPatch("users/{id:long}/addsteamid")]
@@ -70,8 +73,8 @@ namespace RyhmatyoBuuttiServer.Controllers
             }
 
             HttpClient http = new HttpClient();
-            JObject playerSummaries = JObject.Parse(http.GetAsync("https://"+$"api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={apiKey}&steamids={steamId}").Result.Content.ReadAsStringAsync().Result);
-            JObject playerOwnedGames = JObject.Parse(http.GetAsync("https://"+$"api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={apiKey}&steamid={steamId}&include_appinfo=1").Result.Content.ReadAsStringAsync().Result);
+            JObject playerSummaries = JObject.Parse(http.GetAsync(SteamService.PlayerSummariesUrl(apiKey, steamId)).Result.Content.ReadAsStringAsync().Result);
+            JObject playerOwnedGames = JObject.Parse(http.GetAsync(SteamService.PlayerOwnedGamesUrl(apiKey, steamId)).Result.Content.ReadAsStringAsync().Result);
 
             playerSummaries.Merge(playerOwnedGames, new JsonMergeSettings
             {
