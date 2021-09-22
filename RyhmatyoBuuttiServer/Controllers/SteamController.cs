@@ -18,13 +18,11 @@ namespace RyhmatyoBuuttiServer.Controllers
     {
         public IConfiguration Configuration { get; }
         private IUserRepository UserRepository;
-        private ISteamService SteamService;
 
-        public SteamController(IConfiguration configuration, IUserRepository iUserRepository, ISteamService iSteamService)
+        public SteamController(IConfiguration configuration, IUserRepository iUserRepository)
         {
             Configuration = configuration;
             UserRepository = iUserRepository;
-            SteamService = iSteamService;
         }
 
         [HttpPatch("users/{id:long}/addsteamid")]
@@ -73,8 +71,8 @@ namespace RyhmatyoBuuttiServer.Controllers
             }
 
             HttpClient http = new HttpClient();
-            JObject playerSummaries = JObject.Parse(http.GetAsync(SteamService.PlayerSummariesUrl(apiKey, steamId)).Result.Content.ReadAsStringAsync().Result);
-            JObject playerOwnedGames = JObject.Parse(http.GetAsync(SteamService.PlayerOwnedGamesUrl(apiKey, steamId)).Result.Content.ReadAsStringAsync().Result);
+            JObject playerSummaries = JObject.Parse(http.GetAsync(Constants.PlayerSummariesUrl(apiKey, steamId)).Result.Content.ReadAsStringAsync().Result);
+            JObject playerOwnedGames = JObject.Parse(http.GetAsync(Constants.PlayerOwnedGamesUrl(apiKey, steamId)).Result.Content.ReadAsStringAsync().Result);
 
             playerSummaries.Merge(playerOwnedGames, new JsonMergeSettings
             {

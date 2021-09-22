@@ -35,7 +35,6 @@ namespace RyhmatyoBuuttiServer
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<ISteamService, SteamService>();
             services.AddControllers().AddNewtonsoftJson();
             var tokenKey = Configuration.GetValue<string>("TokenKey");
             var key = Encoding.ASCII.GetBytes(tokenKey);
