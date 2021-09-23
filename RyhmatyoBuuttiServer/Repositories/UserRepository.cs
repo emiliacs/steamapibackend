@@ -1,4 +1,5 @@
-﻿using RyhmatyoBuuttiServer.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using RyhmatyoBuuttiServer.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace RyhmatyoBuuttiServer.Repositories
 
         public Boolean doesEmailExist(string email)
         {
-           return _context.Users.Any(u => u.Email == email);
+            return _context.Users.Any(u => u.Email == email);
         }
 
         public Boolean doesUsernameExist(string username)
@@ -54,7 +55,11 @@ namespace RyhmatyoBuuttiServer.Repositories
 
         public IEnumerable<User> getAllUsers()
         {
-            return _context.Users;
+            return _context.Users.Include(u => u.Games);
+        }
+        public User finduserBySteamId(string steamId)
+        {
+            return _context.Users.FirstOrDefault(u => u.SteamId == steamId);
         }
     }
 }
