@@ -11,18 +11,21 @@ namespace RyhmatyoBuuttiServer.Repositories
         {
             _context = context;
         }
-
         public void AddGame(Game game)
         {
             _context.Games.Add(game);
             _context.SaveChanges();
         }
-       
         public Game FindGame(int SteamId)
         {
             return _context.Games.FirstOrDefault(g => g.SteamId == SteamId);
         }
 
+        public void UpdateGame(Game game)
+        {
+            _context.Games.Update(game);
+            _context.SaveChanges();
+        }
     }
 
 }

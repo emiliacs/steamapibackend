@@ -11,5 +11,9 @@
         {
             return "https://" + $"api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={apiKey}&steamid={steamId}&include_appinfo=1";
         }
+        public static string GameExtraDataUrl(int appId)
+        {
+            return "https://" + $"store.steampowered.com/api/appdetails/?appids={appId}"; 
+        }
     }
 }
