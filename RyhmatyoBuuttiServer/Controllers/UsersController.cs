@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Http;
 using System;
 using RyhmatyoBuuttiServer.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace RyhmatyoBuuttiServer.Controllers
 {
@@ -22,14 +23,18 @@ namespace RyhmatyoBuuttiServer.Controllers
         private IJWTAuthenticationManager JWTAuthenticationManager;
         private IUserService UserService;
         private IEmailService EmailService;
+        private IGameRepository GameRepository;
+        public IConfiguration Configuration { get; }
         private readonly int verificationCodeLength = 8, resetCodeLength = 8, expiresInHours = 24;
-        public UsersController(IUserRepository iUserRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager, IUserService iUserService, IEmailService iEmailService)
+        public UsersController(IUserRepository iUserRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager, IUserService iUserService, IEmailService iEmailService, IConfiguration configuration, IGameRepository gameRepository)
         {
             UserRepository = iUserRepository;
             Mapper = iMapper;
             JWTAuthenticationManager = iJWTAuthenticationManager;
             UserService = iUserService;
             EmailService = iEmailService;
+            Configuration = configuration;
+            GameRepository = gameRepository;
         }
 
         [Authorize]
@@ -285,6 +290,53 @@ namespace RyhmatyoBuuttiServer.Controllers
                 );
 
             return Ok(new { message = "User account successfully verified. You can now log in." });
+        }
+
+        [HttpPatch("users/{steamId}/addsteamgames")]
+        public IActionResult AddUsersSteamGames(string steamId)
+        {
+            var user = UserRepository.finduserBySteamId(steamId);
+            string apiKey = Configuration.GetValue<string>("SteamApiKey");
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+            string url = Constants.PlayerOwnedGamesUrl(apiKey, steamId);
+            var gameData = JsonDataSerializerService._download_serialized_json_data<GetOwnedGames.Rootobject>(url).response.games;
+            if (gameData == null)
+            {
+                return NotFound(new { message = "No games found." });
+            }
+            List<Game> userGames = new List<Game>();
+            foreach (var game in gameData)
+            {
+                var foundGame = GameRepository.FindGame(game.appid);
+                if (foundGame == null)
+                {
+                    Game newGame = new Game();
+                    newGame.SteamId = game.appid;
+                    newGame.Name = game.name;
+                    GameRepository.AddGame(newGame);
+                }
+                else
+                {
+                    userGames.Add(foundGame);
+                }
+                user.Games = userGames;
+                UserRepository.UpdateUser(user);
+            }
+            return Ok(user);
+        }
+
+        [HttpGet("users/{userId}/getusersgames")]
+        public IActionResult GetAllGamesOfUser(long userId)
+        {
+            var user = UserRepository.ReturnGamesOfUser(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+            else return Ok(user);
         }
     }
 }
