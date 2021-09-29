@@ -1,4 +1,6 @@
-﻿using RyhmatyoBuuttiServer.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using RyhmatyoBuuttiServer.Models;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RyhmatyoBuuttiServer.Repositories
@@ -7,10 +9,17 @@ namespace RyhmatyoBuuttiServer.Repositories
     {
         private readonly DataContext _context;
 
-        public GameRepository(DataContext context)
+        private readonly IUserRepository _userRepository;
+        public GameRepository(DataContext context, IUserRepository userRepository)
         {
             _context = context;
+            _userRepository = userRepository;
         }
+        public IEnumerable<Game> GetAllGames()
+        {
+            return _context.Games.Include(u => u.Genres).Include(u => u.Developers).Include(u => u.Genres);
+        }
+
         public void AddGame(Game game)
         {
             _context.Games.Add(game);
@@ -26,6 +35,28 @@ namespace RyhmatyoBuuttiServer.Repositories
             _context.Games.Update(game);
             _context.SaveChanges();
         }
+        public Publisher FindPublisher(string name)
+        {
+            return _context.Publishers.FirstOrDefault(p => p.Name == name);
+        }
+
+        public Genre FindGenre(string description)
+        {
+            return _context.Genres.FirstOrDefault(g => g.Description == description);
+        }
+
+        public Developer FindDeveloper(string developer)
+        {
+            return _context.Developers.FirstOrDefault(d => d.Developers == developer);
+        }
+
+        public Game ReturnGameById(int appId)
+        {
+            return _context.Games.Include(g => g.Developers).Include(g => g.Genres).Include(g => g.Publishers).FirstOrDefault(g => g.SteamId == appId);
+        }
+
+
+
     }
 
 }

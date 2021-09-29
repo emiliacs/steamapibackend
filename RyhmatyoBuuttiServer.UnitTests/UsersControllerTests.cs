@@ -1,12 +1,9 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
 using RyhmatyoBuuttiServer.Models;
 using RyhmatyoBuuttiServer.Repositories;
-using RyhmatyoBuuttiServer.Services;
 using System.Collections.Generic;
 using System.Security.Claims;
 using UserController = RyhmatyoBuuttiServer.Controllers.UsersController;
@@ -21,7 +18,7 @@ namespace RyhmatyoBuuttiServer.UnitTests
         {
             var mockRepo = new Mock<IUserRepository>();
             mockRepo.Setup(repo => repo.getAllUsers()).Returns(GetTestUsers());
-            var controller = new UserController(mockRepo.Object, null, null, null, null);
+            var controller = new UserController(mockRepo.Object, null, null, null, null, null, null);
 
             var result = controller.GetAllUsers();
             var okResult = result as OkObjectResult;
@@ -44,12 +41,27 @@ namespace RyhmatyoBuuttiServer.UnitTests
 
             ctx.HttpContext.User = new ClaimsPrincipal(identity);
 
-            var controller = new UserController(mockRepo.Object, null, null, null, null);
+            var controller = new UserController(mockRepo.Object, null, null, null, null, null, null);
             controller.ControllerContext = ctx;
 
             var result = controller.DeleteUser(1);
             var okResult = result as OkObjectResult;
 
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult.StatusCode);
+        }
+
+        [TestCase(3)]
+        public void GetAllGamesOfUser_WithCorrectUserId_ReturnsOk(long id)
+        {
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(s => s.ReturnGamesOfUser(It.IsAny<long>())).Returns(new User()
+            {
+                Id = id
+            });
+            var controller = new UserController(mockRepo.Object, null, null, null, null, null, null);
+            var result = controller.GetAllGamesOfUser(id);
+            var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
         }
@@ -69,7 +81,7 @@ namespace RyhmatyoBuuttiServer.UnitTests
                 VerificationCode = null,
                 VerificationCodeExpires = null
             });
-            
+
             users.Add(new User()
             {
                 Id = 2,

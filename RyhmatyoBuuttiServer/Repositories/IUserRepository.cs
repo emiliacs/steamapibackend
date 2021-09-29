@@ -15,5 +15,6 @@ namespace RyhmatyoBuuttiServer.Repositories
         Boolean doesUsernameExist(string username);
         public IEnumerable<User> getAllUsers();
         public User finduserBySteamId(string steamId);
+        public User ReturnGamesOfUser(long id);
     }
 }

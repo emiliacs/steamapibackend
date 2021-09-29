@@ -16,55 +16,30 @@ namespace RyhmatyoBuuttiServer.Controllers
     {
         private readonly IGameRepository _gameRepository;
 
-        private readonly IUserRepository _userRepository;
-
         private readonly IGameService _gameService;
-        public IConfiguration _configuration { get; }
-        public GameController(IGameRepository gameRepository, IUserRepository userRepository, IConfiguration configuration, IGameService gameService)
+        public GameController(IGameRepository gameRepository , IGameService gameService)
         {
             _gameRepository = gameRepository;
-            _userRepository = userRepository;
-            _configuration = configuration;
             _gameService = gameService;
         }
-
-        [HttpPatch("{steamId}")]
-        public IActionResult AddUsersSteamGames(string steamId)
+        [HttpGet]
+        public IActionResult GetAllGames()
         {
-            var user = _userRepository.finduserBySteamId(steamId);
-            string apiKey = _configuration.GetValue<string>("SteamApiKey");
-            if (user == null)
-            {
-                return NotFound(new { message = "User not found." });
-            }
-            string url = Constants.PlayerOwnedGamesUrl(apiKey, steamId);
-            var gameData = JsonDataSerializerService._download_serialized_json_data<GetOwnedGames.Rootobject>(url).response.games;
-            if (gameData == null)
-            {
-                return NotFound(new { message = "No games found." });
-            }
-            List<Game> userGames = new List<Game>();
-            foreach (var game in gameData)
-            {
-                var foundGame = _gameRepository.FindGame(game.appid);
-                if (foundGame == null)
-                {
-                    Game newGame = new Game();
-                    newGame.SteamId = game.appid;
-                    newGame.Name = game.name;
-                    _gameRepository.AddGame(newGame);
-                }
-                else
-                {
-                    userGames.Add(foundGame);
-                }
-                user.Games = userGames;
-                _userRepository.UpdateUser(user);
-            }
-            return Ok(user);
+            return Ok(_gameRepository.GetAllGames());
         }
 
-        [HttpPatch("{appid}/extradata")]
+        [HttpGet("{appId}")]
+        public IActionResult GetGameByAppId(int appId)
+        {
+            var game = _gameRepository.ReturnGameById(appId);
+            if (game == null)
+            {
+                return NotFound(new { message = "Game not found." });
+            }
+            else return Ok(game);
+        }
+
+        [HttpPatch("{appid}")]
         public async Task<ActionResult> GetExtraGameData(int appid)
         {
             var game = _gameRepository.FindGame(appid);
@@ -89,9 +64,9 @@ namespace RyhmatyoBuuttiServer.Controllers
             _gameService.AddDevelopers(game, gameDetailsDto);
             _gameService.AddPublishers(game, gameDetailsDto);
             _gameService.AddReleaseYear(game, gameDetailsDto);
+            _gameService.AddImageUrl(game, gameDetailsDto);
             _gameRepository.UpdateGame(game);
-
-            return Ok(gameDetailsDto);
+            return Ok(game);
         }
 
 
