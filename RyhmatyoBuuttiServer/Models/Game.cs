@@ -12,6 +12,7 @@ namespace RyhmatyoBuuttiServer.Models
         public List<Publisher> Publishers { get; set; }
         public List<Developer> Developers { get; set; }
         public List<Genre> Genres { get; set; }
+
     }
 }
 

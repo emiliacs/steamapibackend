@@ -13,5 +13,8 @@ namespace RyhmatyoBuuttiServer.Repositories
         Genre FindGenre(string description);
         Developer FindDeveloper(string developer);
         Game ReturnGameById(int appId);
+        UserGame FindUserGame(int SteamId);
+        void AddUserGame(UserGame userGame);
+        void UpdateUserGame(UserGame userGame);
     }
 }

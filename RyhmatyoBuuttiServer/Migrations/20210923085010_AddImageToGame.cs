@@ -18,6 +18,7 @@ namespace RyhmatyoBuuttiServer.Migrations
             migrationBuilder.DropColumn(
                 name: "ImageUrl",
                 table: "Game");
+       
         }
     }
 }
