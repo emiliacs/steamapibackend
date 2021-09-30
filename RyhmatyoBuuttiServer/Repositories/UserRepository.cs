@@ -63,9 +63,9 @@ namespace RyhmatyoBuuttiServer.Repositories
         }
         public User ReturnGamesOfUser(long id)
         {
-            return _context.Users.Include(u => u.Games).ThenInclude(Games => Games.Developers)
-                  .Include(u => u.Games).ThenInclude(Games => Games.Genres)
-                  .Include(u => u.Games).ThenInclude(Games => Games.Publishers).FirstOrDefault(u => u.Id == id);
+            return _context.Users.Include(u => u.Games).ThenInclude(Games => Games.Game.Publishers)
+                                  .Include(u => u.Games).ThenInclude(Games => Games.Game.Genres)
+                                  .Include(u => u.Games).ThenInclude(Games => Games.Game.Publishers).FirstOrDefault(u => u.Id == id);
         }
     }
 }

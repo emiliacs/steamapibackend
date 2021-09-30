@@ -10,6 +10,7 @@ namespace RyhmatyoBuuttiServer
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Developer> Developers { get; set; }
+        public DbSet<UserGame> UserGames { get; set; }
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -19,6 +20,7 @@ namespace RyhmatyoBuuttiServer
             modelBuilder.Entity<Publisher>().ToTable("Publisher");
             modelBuilder.Entity<Developer>().ToTable("Developer");
             modelBuilder.Entity<Genre>().ToTable("Genre");
+            modelBuilder.Entity<UserGame>().ToTable("UserGame");
         }
 
     }

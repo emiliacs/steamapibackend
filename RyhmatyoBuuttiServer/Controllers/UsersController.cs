@@ -70,7 +70,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             string verificationCode = UserService.GenerateAccessCode(verificationCodeLength);
             user.VerificationCode = BC.HashPassword(verificationCode);
             user.VerificationCodeExpires = DateTime.Now.AddHours(expiresInHours);
-            
+
             UserRepository.AddUser(user);
 
             string message = EmailService.welcomeMessage(verificationCode);
@@ -87,7 +87,7 @@ namespace RyhmatyoBuuttiServer.Controllers
         public IActionResult Login(UserLoginDTO model)
         {
             User loginUser = UserRepository.findUserByEmail(model.Email);
-            
+
             if (loginUser == null || !BC.Verify(model.Password, loginUser.Password))
             {
                 return BadRequest(new { message = "Invalid username or password." });
@@ -117,7 +117,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             UserUpdateDTO updateDTO = new UserUpdateDTO
             { Email = user.Email, Username = user.Username };
             userUpdates.ApplyTo(updateDTO, ModelState);
-            
+
             TryValidateModel(updateDTO);
 
             if (!updateDTO.Email.Equals(user.Email) && UserRepository.doesEmailExist(updateDTO.Email))
@@ -168,13 +168,13 @@ namespace RyhmatyoBuuttiServer.Controllers
             UserPasswordChangeDTO passwordChangeDTO = new UserPasswordChangeDTO();
             passwordUpdates.ApplyTo(passwordChangeDTO, ModelState);
 
-            if(!BC.Verify(passwordChangeDTO.CurrentPassword, user.Password))
+            if (!BC.Verify(passwordChangeDTO.CurrentPassword, user.Password))
             {
                 ModelState.AddModelError("Invalid current password", "Invalid current password.");
             }
 
             TryValidateModel(passwordChangeDTO);
-            
+
             if (!ModelState.IsValid)
             {
                 return BadRequest();
@@ -218,15 +218,15 @@ namespace RyhmatyoBuuttiServer.Controllers
             passwordUpdates.ApplyTo(passwordResetDTO, ModelState);
             User user = UserRepository.findUserByEmail(passwordResetDTO.Email);
 
-            if (user == null || user.ResetCode == null || user.ResetCodeExpires == null 
-                || passwordResetDTO.ResetCode == null || !BC.Verify(passwordResetDTO.ResetCode, user.ResetCode) 
+            if (user == null || user.ResetCode == null || user.ResetCodeExpires == null
+                || passwordResetDTO.ResetCode == null || !BC.Verify(passwordResetDTO.ResetCode, user.ResetCode)
                 || DateTime.Now > user.ResetCodeExpires)
             {
                 ModelState.AddModelError("Invalid user input", "Invalid user email address or reset code.");
             }
 
             TryValidateModel(passwordResetDTO);
-            
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -266,7 +266,7 @@ namespace RyhmatyoBuuttiServer.Controllers
         }
 
         [HttpPatch("users/verify")]
-        public IActionResult VerifyUser(JsonPatchDocument<UserVerificationDTO> verificationUpdates) 
+        public IActionResult VerifyUser(JsonPatchDocument<UserVerificationDTO> verificationUpdates)
         {
             UserVerificationDTO verificationDTO = new UserVerificationDTO();
             verificationUpdates.ApplyTo(verificationDTO, ModelState);
@@ -307,7 +307,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             {
                 return NotFound(new { message = "No games found." });
             }
-            List<Game> userGames = new List<Game>();
+            List<UserGame> userGames = new List<UserGame>();
             foreach (var game in gameData)
             {
                 var foundGame = GameRepository.FindGame(game.appid);
@@ -318,13 +318,11 @@ namespace RyhmatyoBuuttiServer.Controllers
                     newGame.Name = game.name;
                     GameRepository.AddGame(newGame);
                 }
-                else
-                {
-                    userGames.Add(foundGame);
-                }
+                userGames = AddUserGames(foundGame, userGames, game);
                 user.Games = userGames;
                 UserRepository.UpdateUser(user);
             }
+
             return Ok(user);
         }
 
@@ -337,6 +335,28 @@ namespace RyhmatyoBuuttiServer.Controllers
                 return NotFound(new { message = "User not found." });
             }
             else return Ok(user);
+        }
+
+        private List<UserGame> AddUserGames(Game foundGame, List<UserGame> userGames, GetOwnedGames.Game game)
+        {
+            var userGameFound = GameRepository.FindUserGame(foundGame.SteamId);
+            if (userGameFound == null)
+            {
+                UserGame userGame = new UserGame();
+                userGame.Game = foundGame;
+                userGame.PlayedHours = game.playtime_forever;
+                userGames.Add(userGame);
+                GameRepository.AddUserGame(userGame);
+            }
+            else
+            {
+                userGameFound.PlayedHours = game.playtime_forever;
+                userGames.Add(userGameFound);
+                GameRepository.UpdateUserGame(userGameFound);
+
+            }
+            return userGames;
+
         }
     }
 }

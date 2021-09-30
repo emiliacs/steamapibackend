@@ -55,7 +55,20 @@ namespace RyhmatyoBuuttiServer.Repositories
             return _context.Games.Include(g => g.Developers).Include(g => g.Genres).Include(g => g.Publishers).FirstOrDefault(g => g.SteamId == appId);
         }
 
-
+        public UserGame FindUserGame(int SteamId)
+        {
+            return _context.UserGames.FirstOrDefault(g => g.Game.SteamId == SteamId);
+        }
+        public void AddUserGame(UserGame userGame)
+        {
+            _context.UserGames.Add(userGame);
+            _context.SaveChanges();
+        }
+        public void UpdateUserGame(UserGame userGame)
+        {
+            _context.UserGames.Update(userGame);
+            _context.SaveChanges();
+        }
 
     }
 
