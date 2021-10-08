@@ -65,7 +65,20 @@ namespace RyhmatyoBuuttiServer.UnitTests
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
         }
-
+        [TestCase(3)]
+        public void GetAllFriends_WithCorrectUserId_RetunsOk(long id)
+        {
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(s => s.ReturnFriendsOfuser(It.IsAny<long>())).Returns(new User()
+            {
+                Id = id
+            });
+            var controller = new UserController(mockRepo.Object, null, null, null, null, null, null);
+            var result = controller.GetAllFriendsOfUser(id);
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult.StatusCode);
+        }
         private IEnumerable<User> GetTestUsers()
         {
             var users = new List<User>();

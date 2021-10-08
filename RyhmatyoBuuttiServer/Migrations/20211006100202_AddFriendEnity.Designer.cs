@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RyhmatyoBuuttiServer;
@@ -9,9 +10,10 @@ using RyhmatyoBuuttiServer;
 namespace RyhmatyoBuuttiServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20211006100202_AddFriendEnity")]
+    partial class AddFriendEnity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,12 +53,6 @@ namespace RyhmatyoBuuttiServer.Migrations
 
                     b.Property<string>("FriendName")
                         .HasColumnType("text");
-
-                    b.Property<string>("RecentlyPlayedGame")
-                        .HasColumnType("text");
-
-                    b.Property<int>("RecentlyPlayedMinutes")
-                        .HasColumnType("integer");
 
                     b.Property<long>("UserEntityId")
                         .HasColumnType("bigint");
@@ -147,12 +143,6 @@ namespace RyhmatyoBuuttiServer.Migrations
 
                     b.Property<string>("Password")
                         .HasColumnType("text");
-
-                    b.Property<string>("RecentlyPlayedGame")
-                        .HasColumnType("text");
-
-                    b.Property<int>("RecentlyPlayedMinutes")
-                        .HasColumnType("integer");
 
                     b.Property<string>("ResetCode")
                         .HasColumnType("text");

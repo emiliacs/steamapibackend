@@ -8,6 +8,7 @@ namespace RyhmatyoBuuttiServer.Repositories
     {
         User findUser(long id);
         User findUserByEmail(string email);
+        User FindUserByName(string name);
         void AddUser(User newUser);
         void UpdateUser(User user);
         void DeleteUser(User user);
@@ -16,5 +17,8 @@ namespace RyhmatyoBuuttiServer.Repositories
         public IEnumerable<User> getAllUsers();
         public User finduserBySteamId(string steamId);
         public User ReturnGamesOfUser(long id);
+        User ReturnFriendsOfuser(long id);
+        void AddFriend(Friend newFriend);
+        Friend GetById(long friendsId, long usersId);
     }
 }

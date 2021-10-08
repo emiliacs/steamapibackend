@@ -24,6 +24,7 @@ namespace RyhmatyoBuuttiServer.Controllers
         private IUserService UserService;
         private IEmailService EmailService;
         private IGameRepository GameRepository;
+
         public IConfiguration Configuration { get; }
         private readonly int verificationCodeLength = 8, resetCodeLength = 8, expiresInHours = 24;
         public UsersController(IUserRepository iUserRepository, IMapper iMapper, IJWTAuthenticationManager iJWTAuthenticationManager, IUserService iUserService, IEmailService iEmailService, IConfiguration configuration, IGameRepository gameRepository)
@@ -35,6 +36,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             EmailService = iEmailService;
             Configuration = configuration;
             GameRepository = gameRepository;
+
         }
 
         [Authorize]
@@ -301,6 +303,7 @@ namespace RyhmatyoBuuttiServer.Controllers
             {
                 return NotFound(new { message = "User not found." });
             }
+            GetRecentlyPlayedGame(user, apiKey);
             string url = Constants.PlayerOwnedGamesUrl(apiKey, steamId);
             var gameData = JsonDataSerializerService._download_serialized_json_data<GetOwnedGames.Rootobject>(url).response.games;
             if (gameData == null)
@@ -317,8 +320,10 @@ namespace RyhmatyoBuuttiServer.Controllers
                     newGame.SteamId = game.appid;
                     newGame.Name = game.name;
                     GameRepository.AddGame(newGame);
+                    userGames = AddUserGames(newGame, userGames, game);
                 }
-                userGames = AddUserGames(foundGame, userGames, game);
+                else userGames = AddUserGames(foundGame, userGames, game);
+
                 user.Games = userGames;
                 UserRepository.UpdateUser(user);
             }
@@ -337,13 +342,59 @@ namespace RyhmatyoBuuttiServer.Controllers
             else return Ok(user);
         }
 
-        private List<UserGame> AddUserGames(Game foundGame, List<UserGame> userGames, GetOwnedGames.Game game)
+        [HttpGet("users/{userId}/getfriends")]
+        public IActionResult GetAllFriendsOfUser(long userId)
         {
-            var userGameFound = GameRepository.FindUserGame(foundGame.SteamId);
+            var user = UserRepository.ReturnFriendsOfuser(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+            else return Ok(user);
+        }
+
+        [HttpPost("users/{userId:long}/addfriend")]
+        public IActionResult AddFriend(long userId)
+        {
+            if (userId != Convert.ToInt64(HttpContext.User.Identity.Name))
+            {
+                return Unauthorized(new { message = "Access denied." });
+            }
+            User user = UserRepository.findUser(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+            string friendName = HttpContext.Request.Query["name"];
+            var friend = UserRepository.FindUserByName(friendName);
+            if (friend == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+            var invalidFriend = UserRepository.GetById(friend.Id, userId);
+            if (invalidFriend != null || user.Id == friend.Id)
+            {
+                return Conflict(new { message = "User can not be added as a friend" });
+            }
+            Friend newFriend = new Friend
+            {
+                FriendEntityId = friend.Id,
+                UserEntityId = userId,
+                FriendName = friendName,
+                RecentlyPlayedGame = friend.RecentlyPlayedGame,
+                RecentlyPlayedMinutes = friend.RecentlyPlayedMinutes
+            };
+            UserRepository.AddFriend(newFriend);
+            return Ok(new { message = "Friend has been added" });
+        }
+
+        private List<UserGame> AddUserGames(Game newGame, List<UserGame> userGames, GetOwnedGames.Game game)
+        {
+            var userGameFound = GameRepository.FindUserGame(newGame.SteamId);
             if (userGameFound == null)
             {
                 UserGame userGame = new UserGame();
-                userGame.Game = foundGame;
+                userGame.Game = newGame;
                 userGame.PlayedHours = game.playtime_forever;
                 userGames.Add(userGame);
                 GameRepository.AddUserGame(userGame);
@@ -356,7 +407,22 @@ namespace RyhmatyoBuuttiServer.Controllers
 
             }
             return userGames;
+        }
 
+        private void GetRecentlyPlayedGame(User user, string apiKey)
+        {
+            string url = Constants.GetRecentlyPlayedGames(apiKey, user.SteamId);
+            var jsondata = JsonDataSerializerService._download_serialized_json_data<RecentlyPlayedGameDTO.Rootobject>(url).response.games;
+            if (jsondata != null)
+            {
+                foreach (var item in jsondata)
+                {
+                    user.RecentlyPlayedGame = item.name;
+                    user.RecentlyPlayedMinutes = item.playtime_2weeks;
+                }
+                UserRepository.UpdateUser(user);
+            }
         }
     }
 }
+
