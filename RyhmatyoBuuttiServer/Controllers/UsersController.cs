@@ -324,10 +324,10 @@ namespace RyhmatyoBuuttiServer.Controllers
                 }
                 else userGames = AddUserGames(foundGame, userGames, game);
 
-                user.Games = userGames;
-                UserRepository.UpdateUser(user);
-            }
 
+            }
+            user.Games = userGames;
+            UserRepository.UpdateUser(user);
             return Ok(user);
         }
 
@@ -346,11 +346,12 @@ namespace RyhmatyoBuuttiServer.Controllers
         public IActionResult GetAllFriendsOfUser(long userId)
         {
             var user = UserRepository.ReturnFriendsOfuser(userId);
+            var userDto = Mapper.Map<UserDTO>(user);
             if (user == null)
             {
                 return NotFound(new { message = "User not found." });
             }
-            else return Ok(user);
+            else return Ok(userDto);
         }
 
         [HttpPost("users/{userId:long}/addfriend")]
@@ -386,6 +387,29 @@ namespace RyhmatyoBuuttiServer.Controllers
             };
             UserRepository.AddFriend(newFriend);
             return Ok(new { message = "Friend has been added" });
+        }
+
+        [HttpDelete("users/{userId:long}/deletefriend")]
+        public IActionResult DeleteFriend(long userId)
+        {
+            if (userId != Convert.ToInt64(HttpContext.User.Identity.Name))
+            {
+                return Unauthorized(new { message = "Access denied." });
+            }
+            User user = UserRepository.findUser(userId);
+            string friendName = HttpContext.Request.Query["name"];
+            var friend = UserRepository.FindUserByName(friendName);
+            if (user == null || friend == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+            var friendShipToDelete = UserRepository.GetById(friend.Id, user.Id);
+            if (friendShipToDelete == null)
+            {
+                return Conflict(new { message = "This friend can not be deleted" });
+            }
+            UserRepository.DeleteFriend(friendShipToDelete);
+            return Ok("Friend has been deleted successfully");
         }
 
         private List<UserGame> AddUserGames(Game newGame, List<UserGame> userGames, GetOwnedGames.Game game)

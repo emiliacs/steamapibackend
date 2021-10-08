@@ -23,6 +23,9 @@ namespace RyhmatyoBuuttiServer
             modelBuilder.Entity<Genre>().ToTable("Genre");
             modelBuilder.Entity<UserGame>().ToTable("UserGame");
             modelBuilder.Entity<Friend>().ToTable("Friend");
+
+
+            modelBuilder.Entity<Friend>().HasOne(u => u.User).WithMany(f => f.Friends).HasForeignKey(o => o.UserEntityId).HasConstraintName("FK_User_Entity_Id");
         }
 
     }

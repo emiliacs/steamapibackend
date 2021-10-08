@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RyhmatyoBuuttiServer.Models
 {
-    public class Friend
+    public class FriendDTO
     {
         public long Id { get; set; }
         public long UserEntityId { get; set; }
@@ -15,8 +15,5 @@ namespace RyhmatyoBuuttiServer.Models
         public string RecentlyPlayedGame { get; set; }
         public int RecentlyPlayedMinutes { get; set; }
 
-        [ForeignKey("UserEntityId")]
-        public User User { get; set; }
     }
 }
-

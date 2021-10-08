@@ -42,14 +42,9 @@ namespace RyhmatyoBuuttiServer.Services
             List<Developer> developers = new List<Developer>();
             foreach (var developer in gameDetailsDto.Developers)
             {
-                var foundDeveloper = _gameRepository.FindDeveloper(developer);
-                if (foundDeveloper == null)
-                {
-                    Developer newDeveloper = new Developer();
-                    newDeveloper.Developers = developer;
-                    developers.Add(newDeveloper);
-                }
-                else developers.Add(foundDeveloper);
+                Developer newDeveloper = new Developer();
+                newDeveloper.Developers = developer;
+                developers.Add(newDeveloper);
             }
             game.Developers = developers;
         }
@@ -58,14 +53,9 @@ namespace RyhmatyoBuuttiServer.Services
             List<Genre> genres = new List<Genre>();
             foreach (var genre in gameDetailsDto.Genres)
             {
-                var foundGenre = _gameRepository.FindGenre(genre.Description);
-                if (foundGenre == null)
-                {
-                    Genre newGenre = new Genre();
-                    newGenre.Description = genre.Description;
-                    genres.Add(newGenre);
-                }
-                else genres.Add(foundGenre);
+                Genre newGenre = new Genre();
+                newGenre.Description = genre.Description;
+                genres.Add(newGenre);
             }
             game.Genres = genres;
         }
@@ -75,14 +65,9 @@ namespace RyhmatyoBuuttiServer.Services
             List<Publisher> publishers = new List<Publisher>();
             foreach (var name in gameDetailsDto.Publishers)
             {
-                var foundPublisher = _gameRepository.FindPublisher(name);
-                if (foundPublisher == null)
-                {
-                    Publisher publisher = new Publisher();
-                    publisher.Name = name;
-                    publishers.Add(publisher);
-                }
-                else publishers.Add(foundPublisher);
+                Publisher publisher = new Publisher();
+                publisher.Name = name;
+                publishers.Add(publisher);
             }
             game.Publishers = publishers;
         }

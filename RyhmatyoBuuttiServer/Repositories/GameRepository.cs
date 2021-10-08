@@ -17,7 +17,7 @@ namespace RyhmatyoBuuttiServer.Repositories
         }
         public IEnumerable<Game> GetAllGames()
         {
-            return _context.Games.Include(u => u.Genres).Include(u => u.Developers).Include(u => u.Genres);
+            return _context.Games.Include(u => u.Genres).Include(u => u.Developers).Include(u => u.Publishers);
         }
 
         public void AddGame(Game game)
