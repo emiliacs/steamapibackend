@@ -9,6 +9,12 @@ namespace RyhmatyoBuuttiServer
         {
             CreateMap<UserRegistrationDTO, User>();
             CreateMap<User, UserAuthenticateResponse>();
+
+            CreateMap<User, UserDTO>();
+            CreateMap<Friend, FriendDTO>();
+
+           
+ 
         }
     }
 }

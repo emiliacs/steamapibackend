@@ -20,5 +20,6 @@ namespace RyhmatyoBuuttiServer.Repositories
         User ReturnFriendsOfuser(long id);
         void AddFriend(Friend newFriend);
         Friend GetById(long friendsId, long usersId);
+        void DeleteFriend(Friend friend);
     }
 }

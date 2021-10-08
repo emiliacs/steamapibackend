@@ -69,7 +69,7 @@ namespace RyhmatyoBuuttiServer.Repositories
         {
             return _context.Users.Include(u => u.Games).ThenInclude(Games => Games.Game.Publishers)
                                   .Include(u => u.Games).ThenInclude(Games => Games.Game.Genres)
-                                  .Include(u => u.Games).ThenInclude(Games => Games.Game.Publishers).FirstOrDefault(u => u.Id == id);
+                                  .Include(u => u.Games).ThenInclude(Games => Games.Game.Developers).FirstOrDefault(u => u.Id == id);
         }
         public User ReturnFriendsOfuser(long id)
         {
@@ -87,6 +87,11 @@ namespace RyhmatyoBuuttiServer.Repositories
         public Friend GetById(long friendsId, long usersId)
         {
             return _context.Friends.FirstOrDefault(i => i.FriendEntityId == friendsId && i.UserEntityId == usersId);
+        }
+        public void DeleteFriend(Friend friend)
+        {
+            _context.Friends.Remove(friend);
+            _context.SaveChanges();
         }
     }
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -73,7 +74,12 @@ namespace RyhmatyoBuuttiServer.UnitTests
             {
                 Id = id
             });
-            var controller = new UserController(mockRepo.Object, null, null, null, null, null, null);
+            var mockMapper = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new AutoMapperProfile());
+            });
+            var mapper = mockMapper.CreateMapper();
+            var controller = new UserController(mockRepo.Object, mapper, null, null, null, null, null);
             var result = controller.GetAllFriendsOfUser(id);
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
