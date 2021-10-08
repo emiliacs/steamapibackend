@@ -30,7 +30,12 @@ namespace RyhmatyoBuuttiServer.Services
 
         public void AddReleaseYear(Game game, GameDetailsDto gameDetailsDto)
         {
-            game.ReleaseYear = Int16.Parse(gameDetailsDto.ReleaseDate.Date.Substring(gameDetailsDto.ReleaseDate.Date.Length - 4));
+            if (!String.IsNullOrEmpty(gameDetailsDto.ReleaseDate.Date))
+            {
+                game.ReleaseYear = Int16.Parse(gameDetailsDto.ReleaseDate.Date.Substring(gameDetailsDto.ReleaseDate.Date.Length - 4));
+            }
+            else game.ReleaseYear = 0;
+
         }
         public void AddDevelopers(Game game, GameDetailsDto gameDetailsDto)
         {

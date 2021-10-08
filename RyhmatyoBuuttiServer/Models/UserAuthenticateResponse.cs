@@ -6,5 +6,6 @@
         public string Email { get; set; }
         public string Username { get; set; }
         public string JwtToken { get; set; }
+        public string SteamId { get; set; }
     }
 }

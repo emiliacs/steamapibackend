@@ -13,7 +13,11 @@
         }
         public static string GameExtraDataUrl(int appId)
         {
-            return "https://" + $"store.steampowered.com/api/appdetails/?appids={appId}"; 
+            return "https://" + $"store.steampowered.com/api/appdetails/?appids={appId}";
+        }
+        public static string GetRecentlyPlayedGames(string apiKey, string steamId)
+        {
+            return "https://" + $"api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key={apiKey}&steamid={steamId}&format=json&count=1";
         }
     }
 }

@@ -15,6 +15,9 @@ namespace RyhmatyoBuuttiServer.Models
         public string VerificationCode { get; set; }
         public DateTime? VerificationCodeExpires { get; set; }
         public string SteamId { get; set; }
+        public string RecentlyPlayedGame { get; set; }
+        public int RecentlyPlayedMinutes { get; set; }
         public ICollection<UserGame> Games { get; set; }
+        public ICollection<Friend> Friends { get; set; }
     }
 }
